@@ -50,6 +50,8 @@
     <assert.version>3.11.1</assert.version>
     <bom.version>3135.v6d6c1f6b_3572</bom.version>
     <workflow.version>2.5</workflow.version>
+
+    <kubernetes-credentials-provider.version>1.262.v2670ef7ea_0c5</kubernetes-credentials-provider.version>
   </properties>
 
   <dependencyManagement>
@@ -195,6 +197,12 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>com.cloudbees.jenkins.plugins</groupId>
+      <artifactId>kubernetes-credentials-provider</artifactId>
+      <version>${kubernetes-credentials-provider.version}</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <repositories>
@@ -221,6 +229,16 @@
             <checkModificationExclude>pom.xml,.gitignore,LICENSE,README.md</checkModificationExclude>
           </checkModificationExcludes>
         </configuration>
+      </plugin>
+      <plugin>
+          <groupId>org.jenkins-ci.tools</groupId>
+          <artifactId>maven-hpi-plugin</artifactId>
+          <configuration>
+              <pluginFirstClassLoader>true</pluginFirstClassLoader>
+              <manifestEntries>
+                  <Plugin-Dependencies>kubernetes-credentials-provider:${kubernetes-credentials-provider.version};resolution:=optional</Plugin-Dependencies>
+              </manifestEntries>
+          </configuration>
       </plugin>
     </plugins>
   </build>

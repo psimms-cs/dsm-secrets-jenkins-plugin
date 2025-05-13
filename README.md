@@ -2,7 +2,7 @@
 
 # Fortanix Data Security Manager Secrets for Jenkins CI-CD
 
-This Jenkins Plugin allows you to access and retrieve secrets (and keys) 
+This Jenkins Plugin allows you to access and retrieve secrets (and keys)
 from Fortanix Data Security Manager for use in build environments.
 
 ## Usage
@@ -13,7 +13,7 @@ or label (name) of a secret (or exportable key).
 
 ![build-configuration](images/jenkins-build-config.jpg)
 
-This configuration specifies the `API Endpoint` of Fortanix DSM 
+This configuration specifies the `API Endpoint` of Fortanix DSM
 server (or service) containing those secrets.
 
 Additionally you will need to include a valid credential provider.
@@ -29,10 +29,10 @@ controls (RBAC) for projects authorized to access those secrets.
 This script also can be used on scripted pipelines using the **withCredentials** instruction.
 
 
-1.  With defaults, which will read specified **path** secret into the predefined environment variables: 
+1.  With defaults, which will read specified **path** secret into the predefined environment variables:
     `FTX_VAR`.
-    
-You just need to specify the `path` variable. 
+
+You just need to specify the `path` variable.
 
 
 Sample pipeline code:
@@ -55,6 +55,32 @@ Sample pipeline code:
  }
  ```
 NOTE: if path variable/ custom env variable not base64 encoded, then you can remove `| base64 -d` from echo statement.
+
+## Kubernetes Integration
+
+This plugin integrates with the [Kubernetes Credentials Provider Plugin](https://plugins.jenkins.io/kubernetes-credentials-provider/) to support automatic creation of Fortanix DSM credentials from Kubernetes secrets.
+
+### Prerequisites
+- Jenkins running in a Kubernetes cluster
+- [Kubernetes Credentials Provider Plugin](https://plugins.jenkins.io/kubernetes-credentials-provider/) installed in Jenkins
+
+### Usage
+
+1. Create a Kubernetes secret with the following format:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: fortanix-credentials
+  annotations:
+    jenkins.io/credentials-description: "Fortanix DSM Credentials"
+  labels:
+    jenkins.io/credentials-type: "com.fortanix.jenkins.credentials.ClientCredentials"
+type: Opaque
+data:
+  apiKey: <base64-encoded-api-key>
+  apiEndpoint: <base64-encoded-api-endpoint>
+
 
 ## Release notes
 
