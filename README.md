@@ -80,6 +80,7 @@ type: Opaque
 data:
   apiKey: <base64-encoded-api-key>
   apiEndpoint: <base64-encoded-api-endpoint>
+```
 
 
 ## Release notes

@@ -79,31 +79,30 @@ public class KubernetesCredentialConverter extends SecretToCredentialConverter {
         String secretName = secret.getMetadata().getName();
         LOGGER.log(Level.FINE, "Converting secret: {0}", secretName);
 
-        try {
-            String id = secretName;
-            Map<String, String> annotations = secret.getMetadata().getAnnotations();
-            String description = annotations != null ? annotations.get(DESCRIPTION_ANNOTATION) : "";
+        Map<String, String> data = secret.getData();
+        if (data == null) {
+            throw new CredentialsConvertionException("Secret data is null for secret: " + secretName);
+        }
 
-            Map<String, String> data = secret.getData();
-            if (data == null) {
-                throw new CredentialsConvertionException("Secret data is null for secret: " + secretName);
-            }
+        try {
+            Map<String, String> annotations = secret.getMetadata().getAnnotations();
+            String description = (annotations != null && annotations.containsKey(DESCRIPTION_ANNOTATION)) ? annotations.get(DESCRIPTION_ANNOTATION) : "";
 
             // Get apiKey
-            String apiKeyBase64 = Optional.ofNullable(data.get(API_KEY_FIELD))
+            String apiKey = Optional.ofNullable(data.get(API_KEY_FIELD))
+                    .map(key -> new String(Base64.getDecoder().decode(key)))
                     .orElseThrow(() -> new CredentialsConvertionException(
                             String.format("No %s found in secret: %s", API_KEY_FIELD, secretName)));
-            String apiKey = new String(Base64.getDecoder().decode(apiKeyBase64));
 
             // Get apiEndpoint
-            String apiEndpointBase64 = Optional.ofNullable(data.get(API_ENDPOINT_FIELD))
+            String apiEndpoint = Optional.ofNullable(data.get(API_ENDPOINT_FIELD))
+                    .map(endpoint -> new String(Base64.getDecoder().decode(endpoint)))
                     .orElseThrow(() -> new CredentialsConvertionException(
                             String.format("No %s found in secret: %s", API_ENDPOINT_FIELD, secretName)));
-            String apiEndpoint = new String(Base64.getDecoder().decode(apiEndpointBase64));
 
             LOGGER.log(Level.FINE, "Successfully converted secret: {0}", secretName);
             return new ClientCredentials(CredentialsScope.GLOBAL,
-                                       id,
+                                       secretName,
                                        description,
                                        apiEndpoint,
                                        hudson.util.Secret.fromString(apiKey));
